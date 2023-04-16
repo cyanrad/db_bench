@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 -- CreateEnum
 CREATE TYPE "jobType" AS ENUM ('FULL_TIME', 'PART_TIME', 'INTERNSHIP');
 
@@ -38,8 +37,6 @@ CREATE TABLE "applicant" (
 
 
 -- CreateTable
-=======
->>>>>>> d2475d441095c4f255378e2a30ed9478cdcb4133
 CREATE TABLE "company" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -51,8 +48,4 @@ CREATE TABLE "company" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "company_pkey" PRIMARY KEY ("id")
-<<<<<<< HEAD
 );
-=======
-);
->>>>>>> d2475d441095c4f255378e2a30ed9478cdcb4133
