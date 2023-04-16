@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/brianvoe/gofakeit/v6 v6.21.0
 	github.com/jackc/pgx/v5 v5.3.1
 )
 

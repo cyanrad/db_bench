@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"main/fake"
 	"math"
 	"os"
 	"testing"
@@ -24,21 +25,9 @@ func TestMain(m *testing.M) {
 	dbConn, err = pgx.Connect(context.Background(), CONNECTION_STRING)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
 	}
 
 	m.Run()
-}
-
-func TestGoFakeIt(t *testing.T) {
-	t.Log(gofakeit.Name())
-}
-
-func TestDbConnection(t *testing.T) {
-	defer dbConn.Close(context.Background())
-
-	resp := clearCompanyTable(dbConn)
-	t.Log(resp)
 }
 
 func BenchmarkCreateCompany(b *testing.B) {
@@ -60,5 +49,34 @@ func BenchmarkCreateCompany(b *testing.B) {
 		b.StartTimer()
 
 		createCompany(dbConn, newCompany)
+	}
+}
+
+func BenchmarkCreateApplicant(b *testing.B) {
+	clearApplicantTable(dbConn)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		applicant := fake.GenerateFakeApplicant()
+		b.StartTimer()
+
+		createApplicant(dbConn, applicant)
+	}
+}
+
+func BenchmarkCreateApplicantTheHardWay(b *testing.B) {
+	clearApplicantTableTheHardWay(dbConn)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		applicant := fake.GenerateFakeApplicant()
+		b.StartTimer()
+
+		err := createApplicantTheHardWay(dbConn, applicant)
+		if err != nil {
+			b.Log(err)
+		}
 	}
 }
