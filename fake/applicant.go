@@ -208,3 +208,8 @@ func GenerateFakeApplicant() Applicant {
 
 	return applicant
 }
+
+func GetRandomApplicant(applicants []Applicant) (Applicant, int) {
+	i := gofakeit.Number(0, len(applicants)-1)
+	return applicants[i], i
+}

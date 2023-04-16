@@ -30,7 +30,6 @@ CREATE TABLE "applicant" (
     "lookingfor" JSONB,
     "awards" JSONB,
     "languages" JSONB,
-    "publication" JSONB,
 
     CONSTRAINT "applicant_pkey" PRIMARY KEY ("id")
 );

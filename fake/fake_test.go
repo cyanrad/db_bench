@@ -1,23 +1,25 @@
 package fake
 
 import (
-	"encoding/json"
+	"main/util"
 	"testing"
 )
 
-// print the contents of the obj
-func PrettyPrint(t *testing.T, data interface{}) {
-	var p []byte
-	p, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		t.Log(err)
-		return
-	}
-
-	t.Logf("%s \n", p)
-}
-
 func TestGenerateFakeApplicant(t *testing.T) {
 	applicant := GenerateFakeApplicant()
-	PrettyPrint(t, applicant)
+	util.PrettyPrint(t, applicant)
+}
+
+func TestGetRandomApplicant(t *testing.T) {
+	applicants := []Applicant{
+		GenerateFakeApplicant(),
+		GenerateFakeApplicant(),
+		GenerateFakeApplicant(),
+	}
+
+	for i := 0; i < 5; i++ {
+		a, index := GetRandomApplicant(applicants)
+		t.Log(index)
+		util.PrettyPrint(t, a)
+	}
 }

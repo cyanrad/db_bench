@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"main/fake"
+	"main/util"
 	"math"
 	"os"
 	"testing"
@@ -28,6 +29,14 @@ func TestMain(m *testing.M) {
 	}
 
 	m.Run()
+}
+
+func TestReadApplicant(t *testing.T) {
+	a := fake.GenerateFakeApplicant()
+	util.PrettyPrint(t, a)
+	createApplicant(dbConn, a)
+	newA := readApplicant(dbConn, a.ID)
+	util.PrettyPrint(t, newA)
 }
 
 func BenchmarkCreateCompany(b *testing.B) {
@@ -65,7 +74,64 @@ func BenchmarkCreateApplicant(b *testing.B) {
 	}
 }
 
+func BenchmarkReadApplicant(b *testing.B) {
+	clearApplicantTable(dbConn)
+	count := 500
+	applicants := make([]fake.Applicant, 0, count)
+	for i := 0; i < count; i++ {
+		a := fake.GenerateFakeApplicant()
+		createApplicant(dbConn, a)
+		applicants = append(applicants, a)
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		randApplicant, _ := fake.GetRandomApplicant(applicants)
+		b.StartTimer()
+
+		readApplicant(dbConn, randApplicant.ID)
+	}
+}
+
+func BenchmarkReadApplicantsTheHardWay(b *testing.B) {
+	clearApplicantTableTheHardWay(dbConn)
+	count := 500
+	applicants := make([]fake.Applicant, 0, count)
+	for i := 0; i < count; i++ {
+		a := fake.GenerateFakeApplicant()
+		createApplicantTheHardWay(dbConn, a)
+		applicants = append(applicants, a)
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		randApplicant, _ := fake.GetRandomApplicant(applicants)
+		b.StartTimer()
+
+		readApplicantTheHardWay(dbConn, randApplicant.ID)
+
+	}
+}
+
 func BenchmarkCreateApplicantTheHardWay(b *testing.B) {
+	clearApplicantTableTheHardWay(dbConn)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		applicant := fake.GenerateFakeApplicant()
+		b.StartTimer()
+
+		err := createApplicantTheHardWay(dbConn, applicant)
+		if err != nil {
+			b.Log(err)
+		}
+	}
+}
+
+func BenchmarkReadApplicantTheHardWay(b *testing.B) {
 	clearApplicantTableTheHardWay(dbConn)
 	b.ResetTimer()
 

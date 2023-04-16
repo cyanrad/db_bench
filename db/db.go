@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"main/fake"
 	"os"
 	"time"
@@ -200,7 +201,6 @@ func clearCompanyTable(conn *pgx.Conn) pgconn.CommandTag {
 	return resp
 }
 
-// i know this is fucking dumb....yeah there is no but
 func clearApplicantTable(conn *pgx.Conn) pgconn.CommandTag {
 	resp, err := conn.Exec(
 		context.Background(),
@@ -214,6 +214,7 @@ func clearApplicantTable(conn *pgx.Conn) pgconn.CommandTag {
 	return resp
 }
 
+// i know this is fucking dumb....yeah there is no but
 func clearApplicantTableTheHardWay(conn *pgx.Conn) {
 	_, err := conn.Exec(
 		context.Background(),
@@ -276,5 +277,78 @@ func clearApplicantTableTheHardWay(conn *pgx.Conn) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "can't do query: %v\n", err)
 		os.Exit(1)
+	}
+}
+
+func readApplicant(conn *pgx.Conn, id string) fake.Applicant {
+	var workExperience string
+	var education string
+	var certifications string
+	var lookingFor string
+	var awards string
+	var languages string
+
+	a := fake.Applicant{}
+	err := conn.QueryRow(
+		context.Background(),
+		"select * from applicant where id=$1", id).Scan(
+		&a.ID, &a.Fname, &a.Lname, &a.Gender, &a.Title, &a.Headline, &a.State, &a.HighestQualification, &a.DomainYearsOfExperience, &workExperience, &education, &certifications, &lookingFor, &awards, &languages)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	a.User.ID = a.ID
+
+	err = json.Unmarshal([]byte(workExperience), &a.WorkExperience)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal([]byte(education), &a.Education)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal([]byte(certifications), &a.Certifications)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal([]byte(lookingFor), &a.LookingFor)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal([]byte(awards), &a.Awards)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal([]byte(languages), &a.Languages)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return a
+}
+
+func readApplicantTheHardWay(conn *pgx.Conn, id string) {
+	rows, err := conn.Query(
+		context.Background(),
+		`SELECT *
+			FROM applicant
+			LEFT JOIN work_experience ON applicant.id = work_experience.applicant_id
+			LEFT JOIN education ON applicant.id = education.applicant_id
+			LEFT JOIN certification ON applicant.id = certification.applicant_id
+			LEFT JOIN looking_for ON applicant.id = looking_for.applicant_id
+			LEFT JOIN award ON applicant.id = award.applicant_id
+			WHERE applicant.id = $1`, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+	var i int
+	for rows.Next() {
+		i++
+		_, err := rows.Values()
+		if err != nil {
+			log.Fatal(err)
+		}
+		// log.Println(values)
 	}
 }
